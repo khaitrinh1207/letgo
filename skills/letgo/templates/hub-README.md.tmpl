@@ -4,6 +4,44 @@ This is an **agent-only** shared context hub for every coding agent working in t
 The human operator does not read it directly. Agents translate internal IDs and evidence into
 complete, unambiguous explanations in chat.
 
+## Routes — load by intent, never by reading a folder
+
+Opening a feature folder and reading everything is what overloads a session. Ask for the intent you
+actually have, and read only what comes back.
+
+| Intent | Command |
+|---|---|
+| Continue a feature | `node .agents/_tools/hub.mjs route <feature> --intent resume` **and** `hub.mjs status <feature>` |
+| Understand the business rules | `hub.mjs route <feature> --intent business` |
+| Find the code behind a surface | `hub.mjs route <feature> --intent implementation` |
+| Prepare a release | `hub.mjs route <feature> --intent release` |
+| Run, watch or repair it | `hub.mjs route <feature> --intent operations` |
+| See every feature and its state | `plans/_REGISTRY.md` (generated — never hand-edit) |
+| Recall a durable lesson | `memories/README.md` |
+| Understand a repository | `context/<repo>/README.md` |
+
+A route returns **prose only**. Delivery evidence — which MR, merged where, deployed, QC'd — lives
+only in `feature.yml`: `hub.mjs status <feature>` prints the states, `status --json` adds the MR ids,
+branches and commits behind them. Reading a route is never enough to know where the work stands.
+
+`hub.mjs compare <feature>` reports whether the code moved since the documents were last verified.
+
+## Writing back
+
+Each document answers ONE question. Write what you learned into the document that owns it — see
+`plans/_INSTRUCTION.md` §"Where to write" — never into whichever file you had open, and never the
+same fact twice. Facts that disagree across two documents are worse than a fact recorded nowhere.
+
+After changing plans, tooling or skills:
+
+```bash
+node .agents/_tools/hub.mjs doctor
+node .agents/_tools/hub.mjs registry check
+node .agents/_tools/graph.mjs build && node .agents/_tools/graph.mjs broken
+```
+
+## Ownership
+
 | Path | Ownership |
 |---|---|
 | `context/` | Stable workspace and repository facts, loaded on demand |
@@ -16,12 +54,14 @@ complete, unambiguous explanations in chat.
 | `_config/` | Secret-free hub and runtime declarations |
 | `_tools/` | Portable deterministic tools governed by `letgo` |
 
+Nothing else belongs at the top level. A regenerable index or cache is not hub context — keep it
+outside `.agents/`.
+
 ## Invariants
 
 - `letgo` owns the reusable frame and validation contract only.
 - This hub is shared by every agent in the workspace.
-- `config/`, `scripts/`, and `skills/` contain project/workspace-specific extensions.
+- `_config/`, `scripts/`, and `skills/` contain project/workspace-specific extensions.
 - Agent-owned prose is concise English. Preserve external quotations and exact domain labels.
 - An internal identifier is paired with its description outside its defining table.
 - Git merge, environment deployment, runtime verification, and QC are separate facts.
-

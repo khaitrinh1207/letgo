@@ -36,6 +36,20 @@ test('scaffold separates workspace instructions from the shared agent hub', () =
   assert.throws(() => readFileSync(path.join(workspace, '.agents', 'onboarding', 'api', 'README.md')));
 });
 
+// A hub whose own files never name `route` and `status` is a directory no agent knows how to use.
+// These two files are what an agent auto-loads, so the commands must survive there, not only in SKILL.md.
+test('the scaffolded instructions teach an agent to read by route and to write back', () => {
+  const workspace = mkdtempSync(path.join(tmpdir(), 'letgo-usable-'));
+  assert.equal(runScaffold(workspace).status, 0);
+
+  for (const file of [path.join(workspace, 'AGENTS.md'), path.join(workspace, '.agents', 'README.md')]) {
+    const content = readFileSync(file, 'utf8');
+    assert.match(content, /hub\.mjs route <feature> --intent/, `${file} must name the route command`);
+    assert.match(content, /hub\.mjs status <feature>/, `${file} must name the status command`);
+    assert.match(content, /_INSTRUCTION\.md/, `${file} must point at the where-to-write map`);
+  }
+});
+
 test('scaffold is idempotent and preserves existing workspace instructions', () => {
   const workspace = mkdtempSync(path.join(tmpdir(), 'letgo-idempotent-'));
   assert.equal(runScaffold(workspace).status, 0);

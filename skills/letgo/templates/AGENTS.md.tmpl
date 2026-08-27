@@ -1,21 +1,43 @@
 # {{PROJECT_NAME}} workspace instructions
 
-The shared agent context hub is [`.agents/`](.agents/README.md). It is the single context source
-for every coding agent working under this workspace.
+The shared agent context hub is [`.agents/`](.agents/README.md) — the single context source for
+every coding agent working under this workspace.
 
 ## Repositories
 
 {{REPOS_LIST}}
 
+## Starting a session
+
+Do not read a feature folder. Ask the hub for the intent you have:
+
+```bash
+node .agents/_tools/hub.mjs route <feature> --intent <resume|business|implementation|release|operations>
+node .agents/_tools/hub.mjs status <feature>     # add --json for MR ids, branches, commits
+```
+
+`route` returns prose only; `status` is the only place delivery state lives. Run both when you are
+picking work up. `plans/_REGISTRY.md` lists every feature (generated — never hand-edit it).
+`.agents/README.md` has the full route table.
+
+## Writing back
+
+Each document answers ONE question. Write what you learned into the document that owns that
+question — the map is `.agents/plans/_INSTRUCTION.md` §"Where to write". Never write into whichever
+file you happened to have open, and never record the same fact twice.
+
+After changing plans, tooling or skills, run `hub.mjs doctor`, `hub.mjs registry check`, and
+`graph.mjs build && graph.mjs broken`.
+
 ## Context contract
 
-- Read `.agents/README.md`, then select context through the plan route for the current intent.
-- `.agents/` is agent-only. Explain internal context fully when communicating with the user.
+- `.agents/` is agent-only. The operator does not read it and will ask you instead: explain outcome,
+  impact, evidence, current state and next action in full, never a bare internal identifier.
+- Never equate a merged change with a deployed or runtime-verified change. Lifecycle, merge,
+  deployment and QC are four independent facts per environment; unproven evidence stays `unknown`.
 - Project-specific configuration, scripts, and skills live in `.agents/_config/`,
-  `.agents/scripts/`, and `.agents/skills/`.
-- Never equate a merged change with a deployed or runtime-verified change.
+  `.agents/scripts/`, and `.agents/skills/` — never in the shared frame.
 
 ## Child instructions
 
 {{CHILD_INSTRUCTIONS}}
-
