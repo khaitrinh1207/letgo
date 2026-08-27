@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "workspace": "{{PROJECT_NAME}}",
+  "repositories": [],
+  "environments": [],
+  "documentAdapters": [],
+  "skillBridges": {
+    "canonical": ".agents/skills",
+    "targets": []
+  }
+}
+

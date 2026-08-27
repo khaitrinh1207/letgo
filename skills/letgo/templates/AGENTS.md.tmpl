@@ -1,0 +1,21 @@
+# {{PROJECT_NAME}} workspace instructions
+
+The shared agent context hub is [`.agents/`](.agents/README.md). It is the single context source
+for every coding agent working under this workspace.
+
+## Repositories
+
+{{REPOS_LIST}}
+
+## Context contract
+
+- Read `.agents/README.md`, then select context through the plan route for the current intent.
+- `.agents/` is agent-only. Explain internal context fully when communicating with the user.
+- Project-specific configuration, scripts, and skills live in `.agents/_config/`,
+  `.agents/scripts/`, and `.agents/skills/`.
+- Never equate a merged change with a deployed or runtime-verified change.
+
+## Child instructions
+
+{{CHILD_INSTRUCTIONS}}
+

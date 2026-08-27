@@ -1,0 +1,5 @@
+version: 1
+documents: []
+
+# Entry fields: id, title, covers, provider, locator, revision, checkedAt, adapter.
+

@@ -1,0 +1,27 @@
+# {{PROJECT_NAME}} agent context hub
+
+This is an **agent-only** shared context hub for every coding agent working in this workspace.
+The human operator does not read it directly. Agents translate internal IDs and evidence into
+complete, unambiguous explanations in chat.
+
+| Path | Ownership |
+|---|---|
+| `context/` | Stable workspace and repository facts, loaded on demand |
+| `plans/` | Feature context, delivery state, evidence, and production readiness |
+| `memories/` | Durable verified lessons |
+| `docs/` | External document registry and project-owned adapters |
+| `environments/` | Cross-environment capability and resource comparisons |
+| `skills/` | Canonical project/workspace skills |
+| `scripts/` | Project/workspace operational scripts |
+| `_config/` | Secret-free hub and runtime declarations |
+| `_tools/` | Portable deterministic tools governed by `letgo` |
+
+## Invariants
+
+- `letgo` owns the reusable frame and validation contract only.
+- This hub is shared by every agent in the workspace.
+- `config/`, `scripts/`, and `skills/` contain project/workspace-specific extensions.
+- Agent-owned prose is concise English. Preserve external quotations and exact domain labels.
+- An internal identifier is paired with its description outside its defining table.
+- Git merge, environment deployment, runtime verification, and QC are separate facts.
+

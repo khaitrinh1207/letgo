@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "feature-slug",
+  "title": "Full feature title",
+  "lifecycle": "active",
+  "summary": "Current outcome.",
+  "contextRoutes": {
+    "resume": ["current-context.md"],
+    "business": ["current-context.md", "requirement.md", "flow.md"],
+    "implementation": ["current-context.md", "implementation-map.md", "artifacts/runtime-flow.md"],
+    "release": ["current-context.md", "prod-checklist.md"],
+    "operations": ["current-context.md", "artifacts/runtime-flow.md"]
+  },
+  "repositories": [
+    {"id": "backend", "path": "repo-a", "documentedRevision": "COMMIT_THE_DOCUMENTS_WERE_VERIFIED_AGAINST", "scopedPaths": ["src"]}
+  ],
+  "deliverables": [{
+    "id": "descriptive-deliverable-id",
+    "title": "What this deliverable gives a user",
+    "changeType": "feature",
+    "branches": {"backend": "user/base/type/slug"},
+    "environments": {
+      "dev": {"mergeState": "not-created", "deploymentState": "pending", "qcState": "pending"},
+      "stg": {"mergeState": "not-created", "deploymentState": "pending", "qcState": "pending"},
+      "prod": {"mergeState": "not-created", "deploymentState": "unknown", "qcState": "unknown"}
+    },
+    "prodChecklist": "prod-checklist.md"
+  }],
+  "artifacts": {
+    "businessFlow": "flow.md",
+    "runtimeFlow": "artifacts/runtime-flow.md",
+    "implementationMap": "implementation-map.md"
+  }
+}

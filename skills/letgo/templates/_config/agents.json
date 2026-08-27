@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "repos": ["."],
+  "targets": {
+    "opencode": true,
+    "claude": true,
+    "cursor": false,
+    "codex": true
+  },
+  "mcpServers": {}
+}
+
