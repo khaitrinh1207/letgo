@@ -1,7 +1,7 @@
 {
   "version": 1,
   "workspace": "{{PROJECT_NAME}}",
-  "repositories": [],
+  "repositories": [{{REPOS_JSON}}],
   "environments": [],
   "documentAdapters": [],
   "skillBridges": {

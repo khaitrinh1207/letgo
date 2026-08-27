@@ -1,0 +1,24 @@
+# {{REPO_NAME}} instructions
+
+Repository-specific guidance. Workspace-wide context lives one level up in
+[`../AGENTS.md`](../AGENTS.md) and the shared hub [`.agents/`](.agents/README.md), which this
+repository reaches through a direct symlink — the same relative paths resolve from either place.
+
+## Starting a session here
+
+```bash
+node .agents/_tools/hub.mjs route <feature> --intent <resume|business|implementation|release|operations>
+node .agents/_tools/hub.mjs status <feature>     # add --json for MR ids, branches, commits
+```
+
+Do not read a feature folder. Write what you learn back into the document that owns the question —
+`.agents/plans/_INSTRUCTION.md` §"Where to write".
+
+Stable context for this repository: [`.agents/context/{{REPO_NAME}}/README.md`](.agents/context/{{REPO_NAME}}/README.md).
+
+## Repository facts
+
+Record here only what is specific to `{{REPO_NAME}}` and cannot be derived from its own config —
+runtime version, package manager, how to build and run it, the checks that gate a change, and the
+traps a newcomer hits. Anything true of the whole workspace belongs in `../AGENTS.md`; anything
+about a feature belongs in its plan.

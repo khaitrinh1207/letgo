@@ -199,12 +199,42 @@ function identifierLintFiles(slug, feature) {
   return found;
 }
 
+const runtimeEntryAliases = { claude: 'CLAUDE.md' };
+
+// A hub only reaches an agent through the file that agent auto-loads. Runtimes disagree on the
+// filename, so a hub can be perfectly valid and still be invisible to half of them.
+function unreachableRuntimes() {
+  const configPath = path.join(hub, '_config', 'agents.json');
+  const projectPath = path.join(hub, '_config', 'project.json');
+  if (!existsSync(configPath)) return [];
+  const targets = JSON.parse(readFileSync(configPath, 'utf8')).targets ?? {};
+  const workspace = path.dirname(hub);
+  const roots = [{ label: 'workspace', path: workspace }];
+  if (existsSync(projectPath)) {
+    for (const repository of JSON.parse(readFileSync(projectPath, 'utf8')).repositories ?? []) {
+      const repoRoot = path.resolve(workspace, repository.path);
+      if (existsSync(repoRoot)) roots.push({ label: repository.path, path: repoRoot });
+    }
+  }
+  const missing = [];
+  for (const root of roots) {
+    if (!existsSync(path.join(root.path, 'AGENTS.md'))) missing.push(`${root.label}: AGENTS.md is missing, so no runtime loads this hub there`);
+    for (const [runtime, enabled] of Object.entries(targets)) {
+      const alias = runtimeEntryAliases[runtime];
+      if (enabled && alias && !existsSync(path.join(root.path, alias))) {
+        missing.push(`${root.label}: ${runtime} is enabled but ${alias} is missing, so ${runtime} never loads this hub`);
+      }
+    }
+  }
+  return missing;
+}
+
 function doctor() {
-  const errors = [];
+  const errors = [...unreachableRuntimes()];
   const slugs = featureSlugs();
   // A freshly scaffolded hub has no features yet. That is a valid hub, not a failure — failing here
   // would make the first command the scaffold tells a new user to run look like a broken install.
-  if (slugs.length === 0) {
+  if (slugs.length === 0 && errors.length === 0) {
     console.log('Hub doctor passed: no features yet. Add one at plans/<feature>/feature.yml — see plans/_templates/.');
     return;
   }

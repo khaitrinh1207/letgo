@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -48,6 +48,30 @@ test('the scaffolded instructions teach an agent to read by route and to write b
     assert.match(content, /hub\.mjs status <feature>/, `${file} must name the status command`);
     assert.match(content, /_INSTRUCTION\.md/, `${file} must point at the where-to-write map`);
   }
+});
+
+// Claude Code auto-loads CLAUDE.md while Codex and OpenCode load AGENTS.md. Without the alias a
+// scaffolded hub is invisible to Claude Code, and every instruction written above never arrives.
+test('every declared runtime has an entry file that resolves, at the root and in each repository', () => {
+  const workspace = mkdtempSync(path.join(tmpdir(), 'letgo-entry-'));
+  mkdirSync(path.join(workspace, 'api'), { recursive: true });
+  mkdirSync(path.join(workspace, 'web'), { recursive: true });
+
+  assert.equal(runScaffold(workspace).status, 0);
+
+  for (const root of [workspace, path.join(workspace, 'api'), path.join(workspace, 'web')]) {
+    const agents = readFileSync(path.join(root, 'AGENTS.md'), 'utf8');
+    assert.match(agents, /hub\.mjs route <feature> --intent/, `${root}/AGENTS.md must name the route command`);
+    assert.match(readFileSync(path.join(root, 'CLAUDE.md'), 'utf8'), /AGENTS\.md/, `${root}/CLAUDE.md must point at AGENTS.md`);
+  }
+
+  // The reachability check must see the repositories, which means scaffold recorded them.
+  const config = JSON.parse(readFileSync(path.join(workspace, '.agents', '_config', 'project.json'), 'utf8'));
+  assert.deepEqual(config.repositories.map((entry) => entry.path), ['api', 'web']);
+
+  // The workspace file links to each repository file it claims exists.
+  const root = readFileSync(path.join(workspace, 'AGENTS.md'), 'utf8');
+  for (const repo of ['api', 'web']) assert.match(root, new RegExp(`${repo}/AGENTS\\.md`));
 });
 
 test('scaffold is idempotent and preserves existing workspace instructions', () => {

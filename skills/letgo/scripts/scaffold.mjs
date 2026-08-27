@@ -30,6 +30,7 @@ function render(relativePath, replacements = {}) {
     DATE: today,
     REPOS_LIST: repos.length ? repos.map((repo) => `- \`${repo}\``).join('\n') : '- (register repository roots here)',
     CHILD_INSTRUCTIONS: repos.length ? repos.map((repo) => `- [\`${repo}/AGENTS.md\`](./${repo}/AGENTS.md) — ${repo} instructions.`).join('\n') : '- (register repository instruction files here)',
+    REPOS_JSON: repos.map((repo) => `\n    {"id": "${repo}", "path": "${repo}", "scopedPaths": []}`).join(',') + (repos.length ? '\n  ' : ''),
     ...replacements,
   };
   for (const [key, value] of Object.entries(values)) content = content.replaceAll(`{{${key}}}`, value);
@@ -38,7 +39,7 @@ function render(relativePath, replacements = {}) {
 
 function writeIfMissing(root, relativePath, content) {
   const target = path.join(root, relativePath);
-  const display = root === workspace ? relativePath : `.agents/${relativePath}`;
+  const display = path.relative(workspace, target) || relativePath;
   if (existsSync(target)) {
     console.log(`[skip ] ${display} (exists)`);
     return 0;
@@ -51,6 +52,22 @@ function writeIfMissing(root, relativePath, content) {
 
 function copyScriptIfMissing(scriptName, targetPath) {
   return writeIfMissing(hub, targetPath, readFileSync(path.join(scriptDir, scriptName), 'utf8'));
+}
+
+// Runtimes disagree on which filename they auto-load: Codex, OpenCode and Cursor read AGENTS.md,
+// Claude Code reads CLAUDE.md. Without an entry file of its own, a scaffolded hub is invisible to
+// Claude Code. A one-line pointer rather than a symlink, because symlinks need elevation on Windows.
+const runtimeEntryAliases = { claude: 'CLAUDE.md' };
+const entryPointer = '# Instructions\n\nFollow [`AGENTS.md`](./AGENTS.md) in this directory. It is the single instruction source here;\nnothing is duplicated into this file.\n';
+
+function ensureEntryAliases(root) {
+  const targets = JSON.parse(render('_config/agents.json')).targets ?? {};
+  let written = 0;
+  for (const [runtime, enabled] of Object.entries(targets)) {
+    const alias = runtimeEntryAliases[runtime];
+    if (enabled && alias) written += writeIfMissing(root, alias, entryPointer);
+  }
+  return written;
 }
 
 function ensureRepoHubLink(repo) {
@@ -85,9 +102,15 @@ created += writeIfMissing(hub, 'scripts/README.md', render('scripts/README.md'))
 created += writeIfMissing(hub, '_config/project.json', render('_config/project.json'));
 created += writeIfMissing(hub, '_config/agents.json', render('_config/agents.json'));
 
+created += ensureEntryAliases(workspace);
+
 for (const repo of repos) {
   created += writeIfMissing(hub, `context/${repo}/README.md`, render('context-repo.md.tmpl', { REPO_NAME: repo }));
   ensureRepoHubLink(repo);
+  const repoRoot = path.join(workspace, repo);
+  if (!existsSync(repoRoot)) continue;
+  created += writeIfMissing(repoRoot, 'AGENTS.md', render('repo-AGENTS.md.tmpl', { REPO_NAME: repo }));
+  created += ensureEntryAliases(repoRoot);
 }
 for (const directory of ['skills', 'plans', 'context']) mkdirSync(path.join(hub, directory), { recursive: true });
 
