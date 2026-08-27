@@ -202,8 +202,13 @@ function identifierLintFiles(slug, feature) {
 function doctor() {
   const errors = [];
   const slugs = featureSlugs();
+  // A freshly scaffolded hub has no features yet. That is a valid hub, not a failure — failing here
+  // would make the first command the scaffold tells a new user to run look like a broken install.
+  if (slugs.length === 0) {
+    console.log('Hub doctor passed: no features yet. Add one at plans/<feature>/feature.yml — see plans/_templates/.');
+    return;
+  }
   for (const slug of slugs) validateFeature(slug, errors);
-  if (slugs.length === 0) errors.push('No feature manifests found under plans/<feature>/feature.yml');
   if (errors.length) {
     for (const error of [...new Set(errors)]) console.error(`- ${error}`);
     process.exitCode = 1;

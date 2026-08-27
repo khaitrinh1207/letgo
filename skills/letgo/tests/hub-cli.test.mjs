@@ -143,6 +143,16 @@ test('an identifier is accepted as a trailing citation, a calendar quarter, or a
   assert.equal(result.status, 0, result.stderr || result.stdout);
 });
 
+test('a freshly scaffolded hub with no features passes doctor', () => {
+  const hub = mkdtempSync(path.join(tmpdir(), 'letgo-empty-'));
+  mkdirSync(path.join(hub, 'plans'), { recursive: true });
+
+  const result = run(hub, 'doctor');
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(result.stdout, /no features yet/);
+});
+
 test('doctor rejects two intents that collapse onto the same documents', () => {
   const hub = fixture();
   const plan = path.join(hub, 'plans', 'sample-feature');
